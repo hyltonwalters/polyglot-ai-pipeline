@@ -1,22 +1,25 @@
-# Stage 1: Build the Go binary securely
-FROM golang:1.22-alpine AS go-builder
-WORKDIR /build
-COPY ConcurrencyEngine/main.go .
-RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o go-pipeline main.go
+# Go worker build stage
+FROM golang:1.23-alpine AS go-builder
+WORKDIR /src
+COPY go.mod ./
+COPY ConcurrencyEngine ./ConcurrencyEngine
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/worker ./ConcurrencyEngine
 
-# Stage 2: Create the final minimal runtime mesh
-FROM python:3.12-slim
+# Python ingestion service
+FROM python:3.12-slim AS ingestion
 WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+COPY IngestionService ./IngestionService
+WORKDIR /app/IngestionService
+EXPOSE 8000
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
-
-RUN pip install --no-cache-dir fastapi uvicorn httpx pydantic
-
-COPY --from=go-builder /build/go-pipeline /usr/local/bin/go-pipeline
-COPY IngestionService/main.py .
-
-EXPOSE 8000 8080
-
-CMD ["sh", "-c", "go-pipeline & uvicorn main:app --host 0.0.0.0 --port 8000"]
+# Go worker service
+FROM alpine:3.21 AS worker
+RUN addgroup -S app && adduser -S -G app app
+COPY --from=go-builder /out/worker /usr/local/bin/worker
+USER app
+EXPOSE 8080
+ENTRYPOINT ["/usr/local/bin/worker"]
