@@ -1,72 +1,106 @@
-# Polyglot AI Integration Service 🚀
+# Polyglot AI Integration Service
 
-An enterprise-grade, concurrent backend data pipeline designed to solve data transformation bottlenecks at scale. This project demonstrates high-performance polyglot engineering, using a Python framework for strict schema parsing and a Go runtime to handle massive network I/O concurrency cleanly.
+A portfolio-grade backend system demonstrating a practical polyglot architecture: **Python/FastAPI** validates and accepts structured records, then delegates batch processing to a **Go worker pool**. Each Go worker can perform deterministic local enrichment or call an **OpenAI-compatible AI endpoint** concurrently.
 
-## 🏗️ Architectural Topology
+The project is intentionally runnable without an API key. `AI_MODE=mock` is the default so the complete pipeline can be tested locally and in CI without external services.
+
+## Architecture
+
+```text
+Client
+  |
+  v
+Python / FastAPI :8000
+  |  validation + HTTP boundary
+  v
+Go Worker Pool :8080
+  |  bounded concurrency
+  +----> Mock enrichment (default)
+  |
+  +----> OpenAI-compatible /chat/completions (optional)
 ```
-[Legacy DB Client Nodes] 
-          │ 
-          │ (Bulk Unstructured Ingestion Payload)
-          ▼
-┌─────────────────────────────────┐
-│  Python Ingestion Service       │ <-- FastAPI / Pydantic Data Safety Layer
-└─────────────────────────────────┘
-          │ 
-          │ (Clean Validated Data Streams)
-          ▼
-┌─────────────────────────────────┐
-│  Go Parallel Worker Pool        │ <-- Multi-threaded I/O (Goroutines/Channels)
-└─────────────────────────────────┘
-          │ 
-          │ (Concurrent Batch Streams)
-          ▼
-[Secure Enterprise LLM Endpoint APIs]
-```
-## 🛠️ Tech Stack & Patterns
-- **Ingestion Microservice:** Python 3.12, FastAPI, Pydantic v2, HTTPX.
-- **Concurrency Microservice:** Go (Golang) 1.22, Native Net/HTTP, Multi-threading Workers.
-- **Containerization & DevOps:** Multi-stage Docker Builds, Linux Alpine Security Hardening.
-- **Engineering Patterns:** Shared Worker Pools, Thread Synchronization (Sync.WaitGroup), Buffered Channels, Context Deadlines.
 
-## 📁 Source Implementation Directories
+## What it demonstrates
 
-### 1. Python Ingestion Gateway (`IngestionService/main.py`)
-Handles upstream connections safely. It applies rigorous typing metrics to filter out corrupted or missing data payloads before passing the stream down the deployment mesh.
+- FastAPI request validation with Pydantic v2
+- Service-to-service HTTP communication with explicit timeouts
+- Go goroutines, channels and a bounded worker pool
+- Context-based per-job deadlines
+- Stable result ordering despite concurrent execution
+- Provider abstraction with a no-network mock implementation
+- Optional OpenAI-compatible AI integration
+- Docker multi-stage builds and Docker Compose service separation
+- Health endpoints and automated tests
+- Basic request-size and batch-size protection
 
-### 2. Go Parallel Concurrency Engine (`ConcurrencyEngine/main.go`)
-Leverages Go's native, lightweight threads (**Goroutines**) to distribute network execution loads concurrently, achieving significantly faster processing speeds than traditional, single-threaded architectures.
+## Run locally
 
----
+### Option A: Python + Go directly
 
-## 🚀 Rapid Deployment & Testing Guide
-
-### Prerequisites
-- Docker Engine installed locally.
-
-### 1. Build and Run the Complete Infrastructure
-Run the multi-stage container environment using your terminal:
 ```bash
-docker build -t polyglot-ai-pipeline .
-docker run -d -p 8000:8000 -p 8080:8080 --name pipeline-running polyglot-ai-pipeline
+# terminal 1
+cd IngestionService
+pip install -r ../requirements.txt
+uvicorn main:app --reload --port 8000
+
+# terminal 2
+go run ./ConcurrencyEngine
 ```
 
-### 2. Run a Concurrent Bulk Load Test
-Execute this `curl` script from your machine to pass mock e-commerce product structures into your local endpoints:
+For direct local execution, set `WORKER_URL=http://localhost:8080/v1/process-batch` before starting FastAPI.
+
+### Option B: Docker Compose
+
 ```bash
-curl -X POST "http://localhost:8000/api/v1/ingest" \
--H "Content-Type: application/json" \
--d '{
-  "products": [
-    {"id": 101, "title": "Table Mountain Leather Boot", "raw_description": "Handcrafted premium footwear."},
-    {"id": 102, "title": "Kruger Safari Utility Jacket", "raw_description": "Rugged double-stitched canvas canvas."},
-    {"id": 103, "title": "Karoo Winter Merino Jersey", "raw_description": "100% organic local technical wool knit."}
-  ]
-}'
+docker compose up --build
 ```
 
-### 3. Review Concurrency Workload Logs
-Inspect the internal thread tracking directly inside your runtime cluster logs:
+The API is then available at `http://localhost:8000`.
+
+## Test the pipeline
+
 ```bash
-docker logs pipeline-running
+curl -X POST http://localhost:8000/api/v1/ingest \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "products": [
+      {"id":101,"title":"Table Mountain Leather Boot","raw_description":"Handcrafted premium footwear."},
+      {"id":102,"title":"Kruger Utility Jacket","raw_description":"Rugged double-stitched canvas jacket."},
+      {"id":103,"title":"Karoo Merino Jersey","raw_description":"Technical wool knit."}
+    ]
+  }'
 ```
-*Output verification will display individual threads executing jobs across multiple workers in parallel.*
+
+Expected response contains `processed: 3`, three ordered results, worker IDs and enrichment data.
+
+Health checks:
+
+```bash
+curl http://localhost:8000/healthz
+curl http://localhost:8080/healthz
+```
+
+## Enable a real AI provider
+
+The worker supports an OpenAI-compatible chat-completions endpoint. The default is mock mode; no secret is required for the demo.
+
+```bash
+AI_MODE=openai-compatible \
+AI_API_KEY=your-key \
+AI_BASE_URL=https://api.openai.com/v1 \
+AI_MODEL=gpt-4o-mini \
+docker compose up --build
+```
+
+Do **not** commit API keys. Use environment variables or a local `.env` file that remains ignored by Git.
+
+## Tests
+
+```bash
+go test ./...
+pytest -q IngestionService
+```
+
+## Engineering notes
+
+This project is a focused portfolio demonstration rather than a claim of production deployment at enterprise scale. The design emphasizes clear boundaries, failure handling, testability and explainable concurrency patterns that can be extended with a queue, persistent storage, authentication, observability and provider-specific adapters when required.
