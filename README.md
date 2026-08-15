@@ -129,6 +129,12 @@ The CI pipeline performs:
 
 The integration test uses `AI_MODE=mock`, making it deterministic and safe to run without secrets or network access to an AI provider.
 
+## Project history
+
+This project began in **January 2026** as part of independent backend engineering work focused on Python/FastAPI, Go concurrency and AI-enabled service integration. Early experimentation was not preserved as a complete public Git commit history; the public repository records the later consolidation, testing, CI and hardening work.
+
+See [`docs/project-history.md`](docs/project-history.md) for the retrospective timeline and the distinction between early project work and dated public Git activity.
+
 ## Engineering notes
 
 This project is a focused portfolio demonstration rather than a claim of production deployment at enterprise scale. The design emphasizes clear boundaries, failure handling, testability and explainable concurrency patterns that can be extended with persistent storage, authentication, observability and provider-specific adapters when required.
