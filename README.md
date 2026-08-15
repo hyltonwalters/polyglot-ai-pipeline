@@ -55,10 +55,28 @@ For direct local execution, set `WORKER_URL=http://localhost:8080/v1/process-bat
 ### Option B: Docker Compose
 
 ```bash
+cp .env.example .env
 docker compose up --build
 ```
 
 The API is then available at `http://localhost:8000`.
+
+## Configuration
+
+The repository includes [`.env.example`](.env.example) with safe defaults for local development.
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `AI_MODE` | `mock` | Selects deterministic local enrichment or `openai-compatible` mode |
+| `AI_API_KEY` | empty | Provider credential; required only for real AI calls |
+| `AI_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible API base URL |
+| `AI_MODEL` | `gpt-4o-mini` | Model name passed to the provider |
+| `MAX_WORKERS` | `4` | Bounded Go worker-pool size; values outside 1-32 fall back to 4 |
+| `JOB_TIMEOUT_MS` | `5000` | Per-job deadline; invalid values fall back to 5000 ms |
+| `PORT` | `8080` | Optional Go worker port when running it directly |
+| `WORKER_URL` | `http://worker:8080/v1/process-batch` | FastAPI-to-worker endpoint; use localhost when running directly |
+
+Do **not** commit secrets. Keep real provider keys in environment variables or a local `.env` file that remains ignored by Git.
 
 ## Test the pipeline
 
@@ -95,8 +113,6 @@ AI_MODEL=gpt-4o-mini \
 docker compose up --build
 ```
 
-Do **not** commit API keys. Use environment variables or a local `.env` file that remains ignored by Git.
-
 ## Tests
 
 Run the application-level test suites from the repository root:
@@ -128,6 +144,12 @@ The CI pipeline performs:
 4. A full containerized end-to-end test through FastAPI and the Go worker
 
 The integration test uses `AI_MODE=mock`, making it deterministic and safe to run without secrets or network access to an AI provider.
+
+## Engineering decisions
+
+The architecture intentionally separates the FastAPI HTTP boundary from the Go processing worker so the project can demonstrate service contracts, bounded concurrency, provider abstraction and explicit failure handling.
+
+See [`docs/engineering-decisions.md`](docs/engineering-decisions.md) for the reasoning, trade-offs and current production-readiness limits.
 
 ## Project history
 
