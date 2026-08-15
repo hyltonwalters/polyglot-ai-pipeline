@@ -145,6 +145,12 @@ The CI pipeline performs:
 
 The integration test uses `AI_MODE=mock`, making it deterministic and safe to run without secrets or network access to an AI provider.
 
+## Further documentation
+
+- [`docs/engineering-decisions.md`](docs/engineering-decisions.md) — architecture choices, trade-offs and current production-readiness limits
+- [`docs/interview-walkthrough.md`](docs/interview-walkthrough.md) — concise technical walkthrough and interview discussion points
+- [`docs/project-history.md`](docs/project-history.md) — retrospective project timeline and the distinction between early work and dated public Git activity
+
 ## Engineering decisions
 
 The architecture intentionally separates the FastAPI HTTP boundary from the Go processing worker so the project can demonstrate service contracts, bounded concurrency, provider abstraction and explicit failure handling.
