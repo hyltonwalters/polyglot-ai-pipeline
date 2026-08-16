@@ -1,3 +1,5 @@
+![Polyglot AI Pipeline banner](docs/social-preview.png)
+
 # Polyglot AI Integration Service
 
 [![CI](https://github.com/hyltonwalters/polyglot-ai-pipeline/actions/workflows/ci.yml/badge.svg)](https://github.com/hyltonwalters/polyglot-ai-pipeline/actions/workflows/ci.yml)
