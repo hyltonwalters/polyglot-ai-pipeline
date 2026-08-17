@@ -27,6 +27,14 @@ class FakeAsyncClient:
         return self.response
 
 
+def test_home_renders_browser_demo():
+    response = client.get("/")
+    assert response.status_code == 200
+    assert "Polyglot AI Integration Service" in response.text
+    assert "Run sample request" in response.text
+    assert 'href="/docs"' in response.text
+
+
 def test_health():
     response = client.get("/healthz")
     assert response.status_code == 200
