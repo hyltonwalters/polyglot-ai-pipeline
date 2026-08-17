@@ -2,7 +2,7 @@
 
 # Polyglot AI Integration Service
 
-[![CI](https://github.com/hyltonwalters/polyglot-ai-pipeline/workflows/CI/badge.svg?branch=main)](https://github.com/hyltonwalters/polyglot-ai-pipeline/actions/workflows/ci.yml?query=branch%3Amain)
+[![CI](https://github.com/hyltonwalters/polyglot-ai-pipeline/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/hyltonwalters/polyglot-ai-pipeline/actions/workflows/ci.yml?query=branch%3Amain)
 
 A portfolio-grade backend system demonstrating a practical polyglot architecture: **Python/FastAPI** validates and accepts structured records, then delegates batch processing to a **Go worker pool**. Each Go worker can perform deterministic local enrichment or call an **OpenAI-compatible AI endpoint** concurrently.
 
