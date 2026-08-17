@@ -14,7 +14,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     JOB_TIMEOUT_MS=5000
 
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --disable-pip-version-check --no-cache-dir --retries 10 --timeout 60 -r requirements.txt
 
 COPY --from=go-builder /out/worker /usr/local/bin/worker
 COPY IngestionService ./IngestionService
