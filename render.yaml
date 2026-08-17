@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: polyglot-ai-pipeline
+    runtime: docker
+    plan: free
+    region: frankfurt
+    branch: main
+    dockerfilePath: ./Dockerfile.render
+    healthCheckPath: /healthz
+    envVars:
+      - key: AI_MODE
+        value: mock
+      - key: MAX_WORKERS
+        value: "4"
+      - key: JOB_TIMEOUT_MS
+        value: "5000"
