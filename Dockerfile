@@ -10,7 +10,7 @@ FROM python:3.12-slim AS ingestion
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY requirements.txt ./
-RUN pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --disable-pip-version-check --no-cache-dir --retries 10 --timeout 60 -r requirements.txt
 COPY IngestionService ./IngestionService
 WORKDIR /app/IngestionService
 EXPOSE 8000
