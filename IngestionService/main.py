@@ -80,13 +80,13 @@ async def home() -> str:
     .section-kicker { color:var(--accent); font-size:.76rem; font-weight:800; text-transform:uppercase; letter-spacing:.1em; }
     h2 { font-size:clamp(1.8rem, 4vw, 2.7rem); letter-spacing:-.035em; margin:9px 0 12px; }
     .section-copy { color:var(--muted); line-height:1.65; max-width:740px; }
-    .pipeline { display:grid; grid-template-columns:repeat(7,1fr); gap:10px; align-items:center; margin-top:28px; }
-    .node { grid-column:span 1; min-height:132px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); border:1px solid var(--border); border-radius:16px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; }
-    .node.wide { grid-column:span 2; }
+    .pipeline { display:grid; grid-template-columns:minmax(0,1fr) 34px minmax(0,1.35fr) 34px minmax(0,1.35fr) 34px minmax(0,1fr); gap:12px; align-items:stretch; margin-top:28px; width:100%; }
+    .node { min-width:0; min-height:132px; background:linear-gradient(180deg,var(--panel-2),var(--panel)); border:1px solid var(--border); border-radius:16px; padding:18px; display:flex; flex-direction:column; justify-content:space-between; }
+    .node.wide { grid-column:auto; }
     .node small { color:var(--accent); text-transform:uppercase; letter-spacing:.08em; font-weight:800; }
     .node strong { font-size:1.02rem; }
-    .node span { color:var(--muted); font-size:.9rem; line-height:1.45; }
-    .arrow { text-align:center; color:#5d7694; font-size:1.4rem; }
+    .node span { color:var(--muted); font-size:.9rem; line-height:1.45; overflow-wrap:anywhere; }
+    .arrow { display:flex; align-items:center; justify-content:center; color:#5d7694; font-size:1.4rem; }
     .demo-shell { display:grid; grid-template-columns:.9fr 1.1fr; gap:18px; margin-top:28px; }
     .panel { background:rgba(12,25,42,.88); border:1px solid var(--border); border-radius:18px; padding:22px; }
     .panel-head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:18px; }
@@ -122,9 +122,9 @@ async def home() -> str:
     footer { color:#71859d; margin-top:72px; border-top:1px solid #172b42; padding-top:22px; font-size:.88rem; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
     @media (max-width:900px) {
       .hero, .demo-shell { grid-template-columns:1fr; }
-      .pipeline { grid-template-columns:1fr; }
-      .node, .node.wide { grid-column:span 1; min-height:auto; }
-      .arrow { transform:rotate(90deg); }
+      .pipeline { grid-template-columns:1fr; gap:10px; }
+      .node, .node.wide { grid-column:auto; min-height:auto; }
+      .arrow { min-height:24px; transform:rotate(90deg); }
       .signals { grid-template-columns:repeat(2,1fr); }
     }
     @media (max-width:560px) {
