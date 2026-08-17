@@ -31,7 +31,10 @@ def test_home_renders_browser_demo():
     response = client.get("/")
     assert response.status_code == 200
     assert "Polyglot AI Integration Service" in response.text
+    assert "FastAPI in front. Go under load." in response.text
     assert "Run sample request" in response.text
+    assert "Bounded worker pool" in response.text
+    assert "Live response" in response.text
     assert 'href="/docs"' in response.text
 
 
