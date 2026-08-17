@@ -1,10 +1,9 @@
 #!/bin/sh
 set -eu
 
-: "${PORT:=10000}"
-export PORT
+public_port="${PORT:-10000}"
 
-/usr/local/bin/worker &
+PORT=8080 /usr/local/bin/worker &
 worker_pid=$!
 
 cleanup() {
@@ -13,4 +12,4 @@ cleanup() {
 trap cleanup INT TERM EXIT
 
 cd /app/IngestionService
-exec uvicorn main:app --host 0.0.0.0 --port "$PORT"
+exec uvicorn main:app --host 0.0.0.0 --port "$public_port"
