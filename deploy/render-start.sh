@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+: "${PORT:=10000}"
+export PORT
+
+/usr/local/bin/worker &
+worker_pid=$!
+
+cleanup() {
+  kill "$worker_pid" 2>/dev/null || true
+}
+trap cleanup INT TERM EXIT
+
+cd /app/IngestionService
+exec uvicorn main:app --host 0.0.0.0 --port "$PORT"
