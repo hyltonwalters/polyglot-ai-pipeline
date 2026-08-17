@@ -6,7 +6,16 @@
 
 A portfolio-grade backend system demonstrating a practical polyglot architecture: **Python/FastAPI** validates and accepts structured records, then delegates batch processing to a **Go worker pool**. Each Go worker can perform deterministic local enrichment or call an **OpenAI-compatible AI endpoint** concurrently.
 
-The project is intentionally runnable without an API key. `AI_MODE=mock` is the default so the complete pipeline can be tested locally and in CI without external services.
+The project is intentionally runnable without an API key. `AI_MODE=mock` is the default so the complete pipeline can be tested locally, in CI and in the public demo without external AI services.
+
+## Live demo
+
+- **Live application:** https://polyglot-ai-pipeline.onrender.com
+- **Interactive API docs:** https://polyglot-ai-pipeline.onrender.com/docs
+- **Health check:** https://polyglot-ai-pipeline.onrender.com/healthz
+- **Source:** https://github.com/hyltonwalters/polyglot-ai-pipeline
+
+The landing page includes a one-click sample request that exercises the complete public-demo path: **FastAPI → Go worker → deterministic mock enrichment**. The hosted demo intentionally uses mock AI mode so it requires no external API key or paid provider.
 
 ## Architecture
 
@@ -37,6 +46,7 @@ Go Worker Pool :8080
 - Health endpoints, automated tests and GitHub Actions CI
 - Basic request-size and batch-size protection
 - End-to-end container integration testing without external AI dependencies
+- Browser-accessible deployment using a dedicated single-container Render adapter while preserving the local two-service architecture
 
 ## Run locally
 
@@ -127,6 +137,7 @@ go test -race -cover ./ConcurrencyEngine
 The tests cover:
 
 - FastAPI health and Pydantic request validation
+- Browser-demo landing page availability
 - Payload normalization before service-to-service forwarding
 - Worker HTTP failure mapping (`502`) and availability failure mapping (`503`)
 - Go worker result ordering and deterministic mock categorization
@@ -142,7 +153,7 @@ The CI pipeline performs:
 
 1. Python dependency installation and `pytest`
 2. Go formatting validation, `go vet`, race-enabled tests and coverage
-3. Docker Compose image builds
+3. Docker Compose image builds plus the dedicated Render demo image build
 4. A full containerized end-to-end test through FastAPI and the Go worker
 
 The integration test uses `AI_MODE=mock`, making it deterministic and safe to run without secrets or network access to an AI provider.
@@ -167,4 +178,4 @@ See [`docs/project-history.md`](docs/project-history.md) for the retrospective t
 
 ## Engineering notes
 
-This project is a focused portfolio demonstration rather than a claim of production deployment at enterprise scale. The design emphasizes clear boundaries, failure handling, testability and explainable concurrency patterns that can be extended with persistent storage, authentication, observability and provider-specific adapters when required.
+This project is a focused portfolio demonstration with a public demo deployment rather than a claim of enterprise-scale production use. The design emphasizes clear boundaries, failure handling, testability and explainable concurrency patterns that can be extended with persistent storage, authentication, observability and provider-specific adapters when required.
