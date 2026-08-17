@@ -1,0 +1,25 @@
+FROM golang:1.23-alpine AS go-builder
+WORKDIR /src
+COPY go.mod ./
+COPY ConcurrencyEngine ./ConcurrencyEngine
+RUN CGO_ENABLED=0 GOOS=linux go build -trimpath -ldflags="-s -w" -o /out/worker ./ConcurrencyEngine
+
+FROM python:3.12-slim
+WORKDIR /app
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    WORKER_URL=http://127.0.0.1:8080/v1/process-batch \
+    AI_MODE=mock \
+    MAX_WORKERS=4 \
+    JOB_TIMEOUT_MS=5000
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY --from=go-builder /out/worker /usr/local/bin/worker
+COPY IngestionService ./IngestionService
+COPY deploy/render-start.sh /usr/local/bin/render-start
+RUN chmod +x /usr/local/bin/render-start
+
+EXPOSE 10000
+CMD ["/usr/local/bin/render-start"]
