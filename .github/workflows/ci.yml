@@ -63,8 +63,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Build services
+      - name: Build local services
         run: docker compose build --pull
+
+      - name: Build Render demo image
+        run: docker build --pull -f Dockerfile.render -t polyglot-render-demo .
 
   integration:
     name: Docker Compose integration test
